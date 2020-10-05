@@ -1,0 +1,8 @@
+---
+
+- name: Clone and update the repo
+    git:
+    repo: '{{ project_django_repo }}'
+    dest: '{{ project_django_path }}'
+    force: yes
+    accept_hostkey: yes

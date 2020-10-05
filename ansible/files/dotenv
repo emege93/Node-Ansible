@@ -1,0 +1,3 @@
+MONGO_URL=mongodb://localhost:27017/eoi
+SECRET=mysecret
+JWT_SECRET=jwtsecre

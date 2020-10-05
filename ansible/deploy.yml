@@ -1,0 +1,68 @@
+---
+    - name: Deploy Node
+      hosts: all
+      remote_user: ubuntu
+
+      vars:
+        project_user: ubuntu
+        project_name: eoi-node
+        project_repo: https://github.com/javaguirre/{{ project_name }}.git
+        project_path: /home/{{ project_user }}/{{ project_name }}
+        server_name: eoi.javimgasir.ml
+        server_proxy_port: 3000
+
+      handlers:
+        - import_tasks: handlers.yml
+
+      tasks:
+        - name: ensure Dependencies in APT is at the latest version
+          become: yes
+          apt:
+            pkg:
+            - nginx
+            - nodejs
+            - npm
+            - mongodb
+            - net-tools
+            state: latest
+            update_cache: yes
+
+        - name: Ensure NGINX is enable
+          service:
+            name: mongodb
+            state: started
+
+        - name: Clone and update the repo
+          git:
+            repo: '{{ project_repo }}'
+            dest: '{{ project_path }}'
+            force: yes
+            accept_hostkey: yes
+
+        - name: Install Yarn
+          command: npm install yarn
+          args:
+            chdir: '{{ project_path }}'
+            creates: '{{ project_path }}/node_modules/.bin/yarn'
+
+        - name: Install yarn packages
+          command: '{{ project_path }}/node_modules/.bin/yarn'
+          args:
+            chdir: '{{ project_path }}'
+
+        - name: Add envvars to project
+          copy:
+            src: dotenv
+            dest: '{{ project_path }}/.env'
+
+        - name: Start PM2
+          command: npm run prod
+          ignore_errors: yes
+          args:
+            chdir: '{{ project_path }}'
+
+        - import_tasks: nginx.yml
+
+
+        # DJANGO
+        # - import_tasks: django.yml

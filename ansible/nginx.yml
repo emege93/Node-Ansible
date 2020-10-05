@@ -1,0 +1,20 @@
+---
+
+- name: Copy NGINX file to sites-available
+  become: yes
+  template:
+    src=nginx.jinja
+    dest=/etc/nginx/sites-available/{{ project_name }}
+
+- name: Symbolic link to sites-enable
+  become: yes
+  file:
+    src=/etc/nginx/sites-available/{{ project_name }}
+    dest=/etc/nginx/sites-enabled/{{ project_name }}
+    state=link
+  notify: reload nginx
+
+- name: NGINX reload
+  become: yes
+  command: service nginx reload
+  tags: nginx

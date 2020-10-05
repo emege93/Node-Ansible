@@ -1,0 +1,15 @@
+upstream {{ server_name }} {
+  server 127.0.0.1:{{ server_proxy_port }};
+}
+
+server {
+  listen 0.0.0.0:80;
+  server_name {{ server_name }};
+  access_log /var/log/nginx/{{ server_name }}.access.log;
+  error_log /var/log/nginx/{{ server_name }}.error.log debug;
+
+  location / {
+    proxy_pass http://{{ server_name }};
+    proxy_redirect off;
+  }
+}
